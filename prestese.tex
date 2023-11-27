@@ -1,0 +1,1597 @@
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{subfig}
+\usepackage{natbib}
+\usepackage{bibentry}
+\usepackage{booktabs} % Allows the use of \toprule,
+\graphicspath{{img/}}
+\usepackage{hyperref}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{$q$-formalismo na dinâmica adaptativa por Extremum Seeking e na Termodinâmica de eletrólitos no contexto da digestão anaeróbia}
+
+%\title{\large{Numerical Optimization Based on \textcolor{black}{Generalized} Extremum Seeking for \textcolor{black}{Fast} Methane Production by a Modified ADM1}}          %
+%\author{Robson W. S. Pessoa$^{a}$, Felipe Mendes$^{a}$, Tiago Roux Oliveira$^{b}$,\\ 
+%Karla Oliveira-Esquerre$^{a}$, Miroslav Krstic$^{c}$}
+                                                                        %
+                                                                                                       %
+                                                                                                       %
+                                                                                                       %
+\titlegraphic{%
+   \includegraphics[scale=.1]{img/brasao_ufba}\hspace*{3.25cm}~%
+   \includegraphics[scale=.25]{img/logogamma}\hspace*{3.0cm}~%
+   \includegraphics[scale=.2]{img/pei}\hspace*{0.75cm}%
+   }                                                                                                       %
+                                                                                                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+%sumario
+%\begin{frame}
+%\frametitle{Sumário} 
+%\tableofcontents
+%\end{frame}
+
+\begin{frame}{Participantes}
+	\begin{block}{Orientadores:}	 
+	\begin{itemize}
+    \item     Karla Patricia Santos Oliveira Rodríguez Esquerre  - Escola Politécnica - UFBA
+    \item      Luciano Matos Queiroz - Escola Politécnica - UFBA
+    \item      Tiago Roux de Oliveira, Faculdade de Engenharia - UERJ
+    \end{itemize}
+	\end{block}
+	
+	\begin{block}{Banca examinadora:}
+	\begin{itemize}
+  \item Prof. Dr. Enrique Lopez Droguett,  
+	\item Prof. Dr. Ignacio Sebastián Gomez
+	\item Prof. Dr. Diego Lima Medeiros
+	\item Prof. Dr. Idelfonso Bessa dos Reis Nogueira
+	\end{itemize}
+	
+	\end{block}
+
+\end{frame}
+
+\section{Documento da tese}
+
+\begin{frame}
+\begin{block}{Maximização da produção de metano}
+
+\end{block}
+\begin{block}{Termodinâmica de equilíbrio do metano}
+
+\end{block}
+\begin{block}{Teoria de Eletrólitos}
+
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+\begin{block}{Tese}
+\begin{figure}[ht] 
+    \includegraphics[width=\linewidth]{diagramcap} 
+    \end{figure}
+\end{block}
+\end{frame}
+
+\section{Objetivo}
+
+
+\begin{frame}{Objetivo}
+\begin{block}{}
+\begin{itemize}
+\item Avaliar diferentes estruturas de extremum seeking baseada nas funções $q$-circulares.
+\item Demonstrar a prova de convergência analítica para projeto de controles extremum seeking generalizado.
+\item Analisar as implicações analíticas da generalização da função de perturbação sobre a velocidade convergência.
+\item Investigar as consequências da aplicação do extremum seeking generalizado sobre o
+efeito de mudanças paramétricas do modelo ADM1.
+\end{itemize}
+\end{block}
+\end{frame}
+
+
+\begin{frame}{Objetivo}
+\begin{block}{}
+\begin{itemize}
+\item Comparar as estimativas de concentração de metano na fase líquida do modelo ADM1
+sem correção do coeficiente de atividade iônica com modelos termodinâmicos com contribuições de interações de longo alcance e curto alcance.
+ \end{itemize}
+\end{block}
+\end{frame}
+
+
+\begin{frame}{Objetivo}
+\begin{block}{}
+\begin{itemize}
+\item Propor equações de potencias eletrostáticos modificado pela $q$-exponencial para as geometrias esférica, plana e cilíndrica.
+\item Comparar o desempenho do modelo de potencial de Debye-Hückel modificado pela $q$-exponencial para a estimativa de tensão superficial e coeficiente de atividade com modelos clássico e modificado.
+ \end{itemize}
+\end{block}
+\end{frame}
+
+
+
+\section{Energia e emissões GEE}
+
+% O relatorio sintese aponta que a reducao de metano deve ocorrer 
+% na industria especialmente em aguat/tratamento de água
+\begin{frame}{AR6 Synthesis Report (SYR)}
+\begin{columns}
+\begin{column}{5cm}
+\begin{block}{AR6}
+\begin{figure}[ht] 
+    \includegraphics[width=\linewidth]{AR6-SG3-IPCC} 
+    \end{figure}
+\end{block}
+\end{column}
+\begin{column}{5cm}
+\begin{block}{Seção 4.5}
+{\it "Rapid and deep reductions in GHG emissions require major energy system transitions (high confidence). Adaptation options can help reduce climate-related risks to the energy system (very high confidence)."}
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+
+
+\begin{frame}{Emissões Fugitivas}
+\begin{columns}
+\begin{column}{5cm}
+\begin{block}{}
+\begin{figure}[ht] 
+    \includegraphics[width=\linewidth]{cad_tec_eng_san_abes_2021} 
+    \end{figure}
+\end{block}
+\end{column}
+\begin{column}{5cm}
+\begin{block}{Emissões Fugitivas}
+{\it "Até $40\%$ de todo o CH4 produzido nos reatores UASB pode
+permanecer dissolvido no efluente tratado (SOUZA et al., 2010).
+Essa perda representa uma redução no potencial de
+recuperação energética. Desse modo, para uma estimativa
+mais acurada, essa parcela precisa ser considerada no balaço
+de massa de DQO."}
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+
+\section{Funções e algebra generalizada}
+
+\begin{frame}
+\begin{figure}
+\includegraphics[width = 7cm]{tsallis1988_resumo}
+\caption{Tsallis, C. (1988). Possible generalization of Boltzmann-Gibbs statistics. Journal of Statistical Physics, 52(1–2), 479–487.}
+\end{figure}
+\begin{columns}
+\begin{column}{5cm}
+\begin{block}{Tsallis}
+\begin{equation}
+S_q = \frac{k_B}{q-1}\sum^W_{i=1}p_i(1-p^{q-1}_i) \nonumber
+\end{equation}  
+\end{block}
+\end{column}
+\begin{column}{5cm}
+\begin{block}{Boltzmann-Gibbs}
+\begin{equation}
+S_1 = k_B\sum^W_{i=1}p_i\log p_i \nonumber
+\end{equation}
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+
+\begin{frame}{$q$-exponencial}
+%\begin{columns}
+%		\begin{column}{3.5cm}
+A função $q$-exponencial,
+ $\exp_q x = [1+(1-q)x]_+^{\frac{1}{1-q}}$,
+%
+onde o símbolo $[A]_+$ como $[A]_+=A$,  se $A>0$, e $[A]_+\equiv0$ se $A\le0$.
+A função inversa da $q$-exponencial é definida por 
+%
+%\begin{equation}
+ $\ln_q x \equiv \frac{x^{1-q}-1}{1-q}$.
+%\end{equation}
+%	\end{column}
+%	\begin{column}{5cm}
+           \begin{figure}
+            \includegraphics[width = 6.5cm]{_q_exp_all_cases_v01.eps}
+	   \end{figure}
+%	\end{column}
+%\end{columns}
+\end{frame}
+
+\begin{frame}{$q$-álgebra}
+\begin{figure}
+\includegraphics[width = 7cm]{borgesalgebra}
+\caption{Borges, E. (2004). A possible deformed algebra and calculus inspired in nonextensive thermostatistics. Physica A: Statistical Mechanics and Its Applications, 340(1–3), 95–101.}
+\end{figure}
+\end{frame}
+
+\begin{frame}{$q$-álgebra}
+A funções $q$-exponencial e $q$-logarítimo leva
+a álgebra $q$-deformada não distributiva.    
+Operações algebricas generalizadas 
+($q$-adição $x \oplus_q y$, $q$-difença $x \ominus_q y$,
+$q$-produto $x \otimes_q y$, $q$-razão $x \oslash_q y$) são definidas como
+%
+\begin{equation}
+\label{eq:qsum}
+ x\oplus_q y \equiv x+y+(1-q)xy,
+\end{equation}
+%
+\begin{equation}
+\label{eq:qdiff}
+ x\ominus_q y \equiv \frac{x-y}{1+(1-q)y}, \quad (y\ne \frac{1}{q-1}),
+\end{equation}
+%
+\begin{equation}
+\label{eq:qproduct}
+ x\otimes_q y \equiv \left[x^{1-q}+y^{1-q}-1\right]^{\frac{1}{1-q}}_+
+ \quad (x,y>0),
+\end{equation}
+%
+\begin{equation}
+\label{eq:qratio}
+ x\oslash_q y \equiv \left[x^{1-q}-y^{1-q}+1\right]^{\frac{1}{1-q}}_+
+ \quad (x,y>0).
+\end{equation}
+%
+Com estas $q$-operações, a $q$-exponencial  segue as propriedades:
+%
+\begin{eqnarray}
+  \begin{array}{lll}
+  \exp_q x \exp_q y          &=&\exp_q(x\oplus_qy), 
+%  &
+  \\
+  \exp_q x / \exp_q y         &=&\exp_q(x\ominus_qy),
+  \\
+  \exp_q x \otimes_q \exp_q y &=&\exp_q(x+y),
+%  &
+  \\
+  \exp_q x \oslash_q \exp_q y &=&\exp_q(x-y).
+  \end{array}
+\end{eqnarray}
+%
+
+\end{frame}
+
+\begin{frame}{$q$-trigonometria}
+\begin{figure}
+\includegraphics[width = 7cm]{borgestrigon}
+\caption{Borges, E. (1998). On a q-generalization of circular and hyperbolic functions. Journal of Physics A: Mathematical and General, 31, 5281.}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{$q$-trigonometria}
+
+
+
+
+\end{frame}
+
+
+
+\section{Modelos de Digestão Anaeróbica}
+\begin{frame}{Modelos}
+\begin{columns}
+\begin{column}{5cm}
+\begin{block}{Haldane}
+\begin{itemize}
+\item Acidogênese
+\item Metanogênese
+\end{itemize}
+Sistema de 4 Equações Diferenciais
+\end{block}
+\end{column}
+\begin{column}{5cm}
+\begin{block}{ADM1}
+\begin{itemize}
+\item Hidrólise, 
+\item Acidogênese, 
+\item Acetogênese e 
+\item Metanogênese
+\end{itemize}
+Sistema de 28 Equações Diferenciais
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+\section{Mapeamento da função objetivo}
+\begin{frame}{Mapeamento da função objetivo}
+    \begin{figure}[h!]
+    \centering
+    \begin{minipage}{.5\columnwidth}
+       \centering
+       \includegraphics[width=0.9\columnwidth]{super_static.eps}
+\captionof{figure}{Função objetico em função da taxa de diluição}
+\label{fig:super_static}
+    \end{minipage}%
+    \begin{minipage}{.5\columnwidth}
+       \centering
+       \includegraphics[width=0.95\columnwidth]{time_response.eps}
+       \captionof{figure}{Tempo de respostaADM1}
+       \label{response}
+    \end{minipage}
+    \end{figure}
+\end{frame}
+
+
+\section{Sistemas com Feedback}
+\begin{frame}
+\begin{block}{Diagrama ES para mapa estático de uma entrada}
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=0.65\textwidth]{escdiagram1.jpg}
+%\label{escdiagram1}
+\end{center}
+\end{figure}
+ \end{block}
+\end{frame}
+
+
+\section{Proposta de Modificação}
+
+\begin{frame}
+\begin{block}{Diagrama ES para mapa estático de uma entrada}
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=0.65\textwidth]{diagram_ESCq.png}
+%\label{escdiagram1}
+\end{center}
+\end{figure}
+ \end{block}
+\end{frame}
+
+\begin{frame}{$sinq(\omega t)$}
+\begin{block}{}
+\begin{figure}[ht] 
+    \includegraphics[width=\linewidth]{sinq.eps} 
+    \end{figure}
+\end{block}
+\begin{columns}
+\begin{column}{5cm}
+\begin{block}{}
+\begin{equation}
+\sin_q(x) = \rho_q(x)\sin_1[\phi_q(x)] \nonumber
+\end{equation}
+\end{block}
+\end{column}
+\begin{column}{5cm}
+\begin{block}{}
+\begin{equation}
+\rho_q(x)={\exp_q((1-q)x^2)}^{\frac{1}{2}} \nonumber
+\end{equation}
+\begin{equation}
+\phi_q(x) = \frac{\arctan_1[(1-q)x]}{1-q}\nonumber
+\end{equation}
+\end{block}	
+\end{column}
+\end{columns}
+\end{frame}
+
+\section{Resultados}
+\begin{frame}{Concentração de Metano}
+\begin{figure}[h!]
+\centering
+%large_range_methane.jpg
+\includegraphics[scale=0.45]{methane_sinq_sin1.eps}
+\caption{\textcolor{black}{A curva \textcolor{red}{vermelha} representa o extremum seeking
+	com a sintonia de amplitude $a_1 = 2.0 \times 10^{-4} $ ($a_q = 0$), a curva  \textcolor{blue}{azul}  $q = 1.01$; $a_q = 2.0 \times 10^{-4}$ and $a_1 = 0$ e a curva \textcolor{green}{verde} $a_1 = 1.0 \times 10^{-5}$ ; $q = 1.01$ and $a_q = 2.0 \times 10^{-4}$ . Em todos os casos, $\omega = 8 \times 10^{-2} ; \omega_h = 5 \times 10^{-3}$ and $k = 1$.}}
+\label{fig:LRmethane}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Taxa de Diluição}
+\begin{figure}[h!]
+\centering
+%large_range_dilution.jpg
+\includegraphics[scale=0.45]{diluicao_sinq_sin1.eps}
+\caption{\textcolor{black}{A curva \textcolor{red}{vermelha} representa o extremum seeking
+	com a sintonia de amplitude $a_1 = 2.0 \times 10^{-4} $ ($a_q = 0$), a curva  \textcolor{blue}{azul}  $q = 1.01$; $a_q = 2.0 \times 10^{-4}$ and $a_1 = 0$ e a curva \textcolor{green}{verde} $a_1 = 1.0 \times 10^{-5}$ ; $q = 1.01$ and $a_q = 2.0 \times 10^{-4}$ . Em todos os casos, $\omega = 8 \times 10^{-2} ; \omega_h = 5 \times 10^{-3}$ and $k = 1$.}}
+\label{fig:LRdilution}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{Pertubações}
+
+\begin{figure}[h!]
+    \centering
+    \subfloat[$a_1 = 1.0\times 10^{-5}$]{\includegraphics[width=4.5cm]{disturbio_1.eps}}%
+    \qquad
+    \subfloat[$a_1 = 2.5\times 10^{-5}$]{\includegraphics[width=4.5cm]{disturbio_3.eps}}%
+    \qquad
+    \subfloat[$a_1 = 5.0\times 10^{-5}$]{\includegraphics[width=4.5cm]{disturbio_2.eps}}%
+    \qquad
+    \subfloat[Respostas após mudanças do ponto máximo.]{\includegraphics[width=4.5cm]{methane_disturbance.eps}}%
+    \qquad
+    \label{fig:disturbance}%
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Solução Analítica}
+
+\begin{equation} 
+|\theta(t)-\theta^{\ast}| \leq |\theta(0)-\theta^{\ast}| \exp({kf^{"}a^2}t/{2}) \nonumber 
+\end{equation}
+
+\begin{equation}
+                         		|{\tilde{\theta}_{avg}(\tau)-\theta^{\ast}}| \leq 
+	|{\tilde{\theta}_{avg}(0)-\theta^{\ast}}| \exp\left(\tau  kcf^{"}\left(a_q^2 {}_2F_1\left(\frac{1}{q-1},\frac{1}{2};\frac{3}{2}; 
+					-(1-q)^2{\tau}^2 \right) + a_1^2 \right)  \right) \nonumber
+\end{equation}
+
+	\begin{equation}
+			\quad 0 \leq \tau < \tau^{\ast} \,.
+     \end{equation}
+\end{frame}
+
+\section{Perspectivas}
+\begin{frame}{Perspectivas}
+	\begin{itemize}
+		\item Exploração de questões de atraso da metanogênese em função de inibição ou condições desfavoráveis das etapas de hidrólise e acidogênse;
+		\item Avaliação sistemática dos limites de estabilidade analítico dos modelos simplificados como Haldane em função do uso de dithers generalizados 
+		\item Proposição de dither alternativo baseado nas propriedades da função $\sin_{2-q}(u) \sin_q(u)$ a qual preserva a amplitude e tem ampliação de período.
+		\item Avaliação de sistema de equações diferencias parciais com mudança de fase. 
+	\end{itemize}
+\end{frame}
+
+
+
+\section{Principíos do Extremum Seeking}
+
+\subsection{Definições e Notações}
+\begin{frame}
+\begin{block}{Sistema não linear}
+	\begin{equation}
+        \frac{dx}{dt} = f(t,x,\epsilon)
+	\end{equation}
+\end{block}
+\begin{block}{}
+onde $x \in  \Re^n$ e $f(t,x,\epsilon)$ é periódico em $t$ com período $T$ e domínio $D\subset\Re$, como segue a Equação~(\ref{eq:esc_a}):
+\end{block}
+\begin{block}{}
+\begin{equation}
+\label{eq:esc_a}
+f(t + T, x,\epsilon ) = f(t, x, \epsilon), \quad \forall (t, x, \epsilon) \in [0, \infty) \times D \times [0, \epsilon_0 ]\,.
+\end{equation}
+\end{block}
+\end{frame}
+
+
+\begin{frame}{Sistema médio}
+	\begin{block}{}
+\begin{equation}
+\label{eq:esc_b}
+\frac{dx_{avg}}{dt} = f_{avg}(x)\,,
+\end{equation}
+	\end{block}
+	\begin{block}{}
+\begin{equation}
+\label{eq:esc_c}
+ f_{avg}(x) = \frac{1}{T} \int_{0}^{T} f(t,x,\epsilon)d\tau\,.
+\end{equation}
+	\end{block}
+	\begin{block}{}
+\begin{equation}
+\label{eq:esc_d}
+f(t,\epsilon)   \leq  C\epsilon, \quad \forall \epsilon \in [0, \epsilon^{\ast} ], \quad \forall \epsilon \in [t_1 , t_2 ].
+\end{equation}
+	\end{block}
+\end{frame}
+
+\section{ES aplicado ao mapa estático}
+
+\begin{frame}
+	\begin{block}{Diagrama ES para mapa estático de uma entrada}
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=0.65\textwidth]{escdiagram1.jpg}
+%\label{escdiagram1}
+\end{center}
+\end{figure}
+        \end{block}
+
+\end{frame}
+
+\begin{frame}
+\begin{columns}
+	\begin{column}{5cm}
+\begin{block}{}
+\begin{equation}
+\label{eq:esc_e}
+y:= f(\theta) = f^{\ast} + \frac{f^{''}}{2}(\theta - \theta^{\ast})\,.
+\end{equation}
+\end{block}
+\begin{block}{}
+\begin{itemize}
+\item $\theta^{\ast}$ - Valor ótimo desconhecido;
+\item $\hat{\theta}(t)$ - Estimativa em tempo real de $\theta^{\ast}$;
+\item $\theta(t)$ - Valor atual da entrada do mapa
+\end{itemize}
+\end{block}
+\end{column}
+	\begin{column}{5cm}
+	\begin{block}{Diagrama ES para mapa estático de uma entrada}
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=0.65\textwidth]{escdiagram1.jpg}
+\label{escdiagram1}
+\end{center}
+\end{figure}
+        \end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Reprodução do artigo}
+	\begin{block}{Computers and Chemical Engineering 75 (2015) 49–59}
+          
+	\end{block}
+\end{frame}
+
+\begin{frame}{Perspectivas}
+
+\begin{itemize}
+\item Identificação de conjuntos de parametrização típicos do dither generalizado. 
+\item Desenvolvimento de estruturas de auto-sintonia
+\item MPC econômico + q-ESC 
+\item \href{DeepONet}{https://www.quantamagazine.org/latest-neural-nets-solve-worlds-hardest-equations-faster-than-ever-before-20210419} 
+\end{itemize}
+
+\end{frame}
+
+%###################################################################################
+
+\section{Funções e algebra generalizada}
+
+\begin{frame}{$q$-exponencial}
+	\begin{columns}
+		\begin{column}{5cm}
+A função $q$-exponencial é definida por:
+%
+\begin{equation}
+\label{eq:qexp}
+ \exp_q x = [1+(1-q)x]_+^{\frac{1}{1-q}}\nonumber \,,
+\end{equation}
+%
+onde o símbolo $[A]_+$ como $[A]_+=A$,  se $A>0$, e $[A]_+\equiv0$ se $A\le0$.
+A função inversa da $q$-exponencial é definida por 
+%
+\begin{equation}
+\label{eq:qlogc2}
+ \ln_q x \equiv \frac{x^{1-q}-1}{1-q} \nonumber\,.
+\end{equation}
+	\end{column}
+	\begin{column}{5cm}
+           \begin{figure}
+            \includegraphics[width = 4.5cm]{_q_exp_all_cases}
+	   \end{figure}
+	\end{column}
+\end{columns}
+\end{frame}
+
+% \begin{frame}{$q$-álgebra}
+% A funções $q$-exponencial e $q$-logarítimo leva
+% a álgebra $q$-deformada não distributiva.    
+% Operações algebricas generalizadas 
+% ($q$-adição $x \oplus_q y$, $q$-difença $x \ominus_q y$,
+% $q$-produto $x \otimes_q y$, $q$-razão $x \oslash_q y$) são definidas como
+% %
+% \begin{equation}
+% \label{eq:qsum}
+%  x\oplus_q y \equiv x+y+(1-q)xy,
+% \end{equation}
+% %
+% \begin{equation}
+% \label{eq:qdiff}
+%  x\ominus_q y \equiv \frac{x-y}{1+(1-q)y}, \quad (y\ne \frac{1}{q-1}),
+% \end{equation}
+% %
+% \begin{equation}
+% \label{eq:qproduct}
+%  x\otimes_q y \equiv \left[x^{1-q}+y^{1-q}-1\right]^{\frac{1}{1-q}}_+
+%  \quad (x,y>0),
+% \end{equation}
+% %
+% \begin{equation}
+% \label{eq:qratio}
+%  x\oslash_q y \equiv \left[x^{1-q}-y^{1-q}+1\right]^{\frac{1}{1-q}}_+
+%  \quad (x,y>0).
+% \end{equation}
+% %
+% Com estas $q$-operações, a $q$-exponencial  segue as propriedades:
+% %
+% \begin{eqnarray}
+%   \begin{array}{lll}
+%   \exp_q x \exp_q y          &=&\exp_q(x\oplus_qy), 
+% %  &
+%   \\
+%   \exp_q x / \exp_q y         &=&\exp_q(x\ominus_qy),
+%   \\
+%   \exp_q x \otimes_q \exp_q y &=&\exp_q(x+y),
+% %  &
+%   \\
+%   \exp_q x \oslash_q \exp_q y &=&\exp_q(x-y).
+%   \end{array}
+% \end{eqnarray}
+% %
+% 
+% \end{frame}
+
+\section{Interações de Curto Alcance}
+\subsection{Potencial de Lennard Jones}
+\begin{frame}
+O potencial de Lennard-Jonnes contabiliza as contribuições das interações de moléculas 
+apolares dividindo em duas parcelas que correspondem às forças repulsivas e atrativas: 
+\begin{equation}
+	\Gamma_{total} = \Gamma_{repulsiva} + \Gamma_{atrativa} = \frac{A}{r^n} - \frac{B}{r^m}\,.
+\end{equation}
+	\begin{itemize}
+	\item Forças eletrostáticas entre partículas carregadas e dipolos permamente; 
+	\item Forças de indução entre dipolo permanente e dipolo induzido;
+	\item Forças de atração (forças de dispersão) e repulsão entre moléculas apolares;
+	\item forças específicas para associação e formação de complexos
+	\end{itemize}
+\end{frame}
+
+%\begin{frame}{Não extensividade}
+%
+%\end{frame}
+%
+%
+%\begin{frame}{Relações Termodinâmicas}
+%
+%
+%\end{frame}
+
+\subsection{Teoria de soluções}
+
+%\subsection{Guggeinheim}
+
+\subsection{Teoria de Scatchard-Hildebrand}
+\begin{frame}{Teoria de Scatchard-Hildebrand}
+	\begin{itemize}
+		\item Solução Regular - desaparecimento da entropia de mistura para $T$ e $V$ constantes.
+		\item Densidade de energia coesiva $c \equiv \Delta u^v / v^L$
+		\item Definição de regra de mistura binária para
+	\end{itemize}
+	\begin{columns}
+		\begin{column}{6cm}
+	\begin{block}{Mistura Binária}
+	\begin{equation}
+		-(u^{L} - u^{ig} )  = \frac{\sum_i^2 \sum_j^2 c_{ij}v_iv_jx_ix_j}{\left(\sum_k^2 x_k v_k \right)}
+	\end{equation}
+	\end{block}
+		\end{column}
+		\begin{column}{4cm}
+			\begin{block}{Fração do volume}
+                 \begin{equation}
+                     \Phi_i = \frac{x_iv_i}{\sum_k^2 x_k v_k}
+		 \end{equation}
+			\end{block}
+		\end{column}
+	\end{columns}
+	\begin{block}{ }
+	$-(u^{L} - u^{ig} )  =  (x_1v_1 + x_2v_2)[c_{11}\Phi_{1}^2 + 2c_{12}\Phi_{1}\Phi_{2} + c_{22}\Phi_{2}^{2}]$
+	\end{block}
+\end{frame}
+
+\subsection{Modelo de Wilson}
+
+\begin{frame}{Modelo de Wilson}
+%
+\begin{equation}
+\label{eq:ge-qwilson}
+ \frac{g^E}{RT} = \sum_i^c x_i \ln \frac{\xi_{ii}}{x_i},
+\end{equation}
+%
+onde $\xi_{ii}$  é a fração volumétrica local do compoenente $i$
+na vizinhança de outra molécula $i$ 
+( O modelo de Flory-Huggins para soluções poliméricas atérmicas 
+usa a fração de segmento global $\xi_i$ no lugar de 
+$\xi_{ii}$, na Eq.~(\ref{eq:ge-qwilson})).
+%
+A fração volumétrica local é dada por 
+%
+\begin{equation}
+\label{eq:xi_ii}
+ \xi_{ii}=\frac{x_{ii} v_i}{\sum_j^c x_{ji} v_j},
+\end{equation}
+%
+\end{frame}
+
+\begin{frame}{Composição Local}
+	\begin{block}{Composição local}
+		\begin{equation}
+		\frac{x_{ij}}{x_{jj}}=\frac{x_i}{x_j} \frac{\exp(-\frac{a_{ij}}{RT})}{\exp(-\frac{a_{jj}}{RT})}\,,
+		\end{equation}
+	\end{block}
+onde  $x_i$ 
+é a fração molar {\it bulk} da espécie $i$, e 
+$x_{ij}$ é a fração molar local da espécie $i$
+nas vizinhanças da molécula $j$.
+%\begin{itemize}
+%	\item Comentários
+%\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Dependência de $A_{ij}$ com temepratura}
+%
+\begin{equation}
+\label{eq:A1}
+ A_{ij}=\exp\left( - \frac{\Delta a_{ij}}{RT}\right),
+\end{equation}
+com $\Delta a_{ij}=a_{ij}-a_{jj}$, e
+$a_{ij}$ 
+é a energia potencial molar de interações entre espécies 
+$i$ e $j$, com $a_{ji}=a_{ij}$. 
+%
+%
+% empirical changes for the temperature dependence
+%$\Delta a_{ij}$ é originalmente assumido constante. 
+%Extensões do modelos relaxam esta hipótese, e 
+%consideram 
+	\begin{columns}
+		\begin{column}{5cm}
+
+			\begin{block}{Renon (1968)}
+$\Delta a_{ij}=\Delta a_{ij}(T)$,
+%de acordo com várias funções, por exemplo, uma relação linear  \cite{Renon1968}, 
+			\end{block}
+			\begin{block}{Thomsen}
+%\begin{equation}
+%\label{eq:thomsen}
+$ \Delta a_{ij}=\Delta a_{ij,0}+\Delta a_{ij,1}(T-T_0)$
+%\end{equation}
+			\end{block}
+%
+			\begin{block}{Anderson-Prausnitz}			
+%o inverso da temperatura absoluta~\cite{anderson-prausnitz},
+%\begin{equation}
+%\label{eq:anderson}
+$ \Delta a_{ij}=\Delta a_{ij,0}+\frac{\Delta a_{ij,1}}{T}$
+%\end{equation}
+			\end{block}
+%
+%uma combinação de ambas as relações linear e inversa~\cite{escobedo-sandler},
+		\end{column}
+		\begin{column}{5cm}
+			\begin{block}{Escobedo-Sandler}
+%			\begin{equation}
+$ \Delta a_{ij}=\Delta a_{ij,0}+\Delta a_{ij,1} T
+ +\frac{\Delta a_{ij,2}}{T}$
+%\end{equation}
+			\end{block}
+			%
+%ou, então \cite{demirel-gecegormez-paksoy-p1:1992},
+			\begin{block}{Dimerel et al.}
+%\begin{equation}
+%\label{eq:schmidt}
+$ \Delta a_{ij}=\Delta a_{ij,0}+\frac{\Delta a_{ij,1}}{T-T_0}$
+%\end{equation}
+			\end{block}
+%
+%ou mesmo com o termo logarítimo~\cite{larsen:1987}:
+			\begin{block}{Larsen}			
+%\begin{eqnarray}
+%\label{eq:larsen:1987}
+$ \Delta a_{ij}=\Delta a_{ij,0}+\Delta a_{ij,1}(T-T_0) $
+% \nonumber \\
+$ +\Delta a_{ij,2} \left(T\ln \frac{T_0}{T} + T - T_0 \right)$
+%\end{eqnarray}
+			\end{block}
+%
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Composição local generalizada}
+\begin{equation}
+\frac{x_{ij}}{x_{jj}}=
+\label{eq:xijxjj}
+                       \frac{x_i}{x_j}
+                       \exp_{q_{ij}}\left(-\frac{a_{ij}}{RT}\right) 
+                       \oslash_{q_{ij}}
+                       \exp_{q_{ij}}\left(-\frac{a_{jj}}{RT}\right).
+\end{equation}
+%
+Substituição da Eq.~(\ref{eq:xijxjj}) 
+na condição de normalização  
+$\sum_i^c x_{ij}=1$ ($c$ é o número de espécies químicas) resulta
+%
+\begin{equation}
+\label{eq:xij}
+ x_{ij}=\frac{x_i A_{q,ij}}{\sum_k^c x_k A_{q,kj}},
+\end{equation}
+%
+com o parâmetro $A_{q,ij}$ dado por%
+\footnote{Nós adotamos o símbolo $A_{q,ij}$, ao invés de 
+$A_{q_{ij},ij}$, para evitar uma notação desnecessária.}
+%
+\begin{equation}
+\label{eq:Aq}
+ A_{q,ij} \equiv \exp_{q_{ij}}\left(-\frac{\Delta a_{ij}}{RT}\right),
+\end{equation}
+%
+com $\Delta a_{ij}=a_{ij}-a_{jj}$. 
+A simetria das interações implica  $a_{ji}=a_{ij}$,
+e nós assumimos, por simplicidade, $q_{ji}=q_{ij}$.
+O caso limite $q_{ij}\to 1$ 
+recupera o parâmetro usual
+$A_{ij}\equiv A_{1,ij}$,
+%
+\begin{equation}
+\label{eq:A1}
+ A_{1,ij}=\exp_1\left( - \frac{\Delta a_{ij}}{RT}\right),
+\end{equation}
+%
+%	Eq.~(\ref{eq:A1}).
+\end{frame}
+
+
+\begin{frame}
+%
+\begin{figure}[htb]
+\begin{center}
+ \includegraphics[width=0.75\columnwidth,keepaspectratio,clip]{A12vsa12.eps}
+\end{center}
+\caption{\label{fig:A12-a12}%
+         O parâmetro  $A_{q,12}$, Eq.~(\protect\ref{eq:Aq}), como uma função do 
+          parâmetro de interação binário $\Delta a_{12}$ (com $T=298.15$~K).
+         Com $q_{12}=0.5$ (pontilhada e tracejada), $q_{12}=1$ (sólida), 
+         e $q_{12}=1.5$ (tracejada).
+         ponto-ponto tracejada as curvas usam Eq.  de Anderson para 
+         $\Delta a_{12,1}=5\times10^5$~J~K/mol.
+}
+\end{figure}
+%
+\end{frame}
+
+\begin{frame}
+
+\begin{figure}
+\begin{center}
+ \includegraphics[width=0.45\columnwidth]{A12a5000J.eps}
+% 
+ \includegraphics[width=0.45\columnwidth]{A12a-5000J.eps}
+\end{center}
+\caption{\label{fig:A12-1suT}%
+         O parâmetro $A_{q,12}$, Eq.~(\protect\ref{eq:Aq}),
+         como uma função do inverso da temperatura (convencionalmente escalado),
+         para dois valores típicos de  $\Delta a_{12}$.
+         O caso do modelo ordinário $q_{12}=1$  aparece como linha cheia 
+	 nestes gráficos semi-log. 
+         $q_{12}>1$ ($q_{12}<1$) apresenta concavidade positiva (negativa).
+}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\begin{figure}
+\begin{center}
+ \includegraphics[width=0.5\columnwidth]{A12a5000J.eps}
+\end{center}
+\caption{\label{fig:A12-1suT}%
+         O parâmetro $A_{q,12}$, Eq.~(\protect\ref{eq:Aq}),
+         como uma função do inverso da temperatura (convencionalmente escalado),
+         para dois valores típicos de  $\Delta a_{12}$.
+         O caso do modelo ordinário $q_{12}=1$  aparece como linha cheia 
+	 nestes gráficos semi-log. 
+         $q_{12}>1$ ($q_{12}<1$) apresenta concavidade positiva (negativa).
+}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Coeficiente de Atividade a diluição infinita}
+%
+\begin{equation}
+ \frac{g^E}{RT}=-\sum_i^c x_i \ln\left(\sum_j^c x_j \Lambda_{q,ij}\right),
+\end{equation}
+%
+com $\Lambda_{q,ij}=(v_j/v_i)A_{q,ij}$.
+%
+O coeficiente de atividade é formalmente dado pela mesma expressão  do modelo
+original ($q_{ij}=1$) , mas com o parâmetro $\Lambda_{q,ij}$ dependente de $q$ :
+%
+\begin{equation}
+ \ln \gamma_i = -\ln\left(\sum_j^c x_j \Lambda_{q,ij}\right) + 1 
+         - \sum_j^c \frac{x_j \Lambda_{q,ji}}{\sum_k^c x_k \Lambda_{q,jk}}.
+\end{equation}
+%
+\end{frame}
+
+\begin{frame}{Resultado - Modelo de Wilson}
+	\begin{block}{IDAC q-Wilson mistura binária}
+           $\ln \gamma_1^\infty = \ln \Lambda_{q,12} - \Lambda_{q,21} + 1.$
+	\end{block}
+\begin{figure}
+\begin{center}
+ \includegraphics[width=0.75\columnwidth,keepaspectratio,clip]{ginft1a12+10000Ja21-5600J.eps}
+\end{center}
+\caption{\label{fig:ginfty}%
+         $\Delta a_{12}=10^4$~J/mol e $\Delta a_{21}=-5600$~J/mol
+         ($v_1=v_2$). 
+}
+\end{figure}
+\end{frame}
+
+\begin{frame}{IDAC - etanol(1)-tolueno(2)}
+\begin{figure}
+\begin{center}
+ \includegraphics[width=0.75\columnwidth]{ginf-T-toluene-ethanol.eps}
+\end{center}
+\caption{\label{fig:ethanol}%
+         (a) Linhas tracejadas: 
+             $\Delta a_{12}= 6880.0$~J/mol, $\Delta a_{21}=-582.0$~J/mol;
+             linhas sólidas: 
+         $q_{12}=0.83$, 
+         $\Delta a_{12}=10267.0$~J/mol, $\Delta a_{21}=-5179.7$~J/mol.
+         }
+\end{figure}
+\end{frame}
+
+		\begin{frame}{IDAC - etanol(1)-decano(2)}
+\begin{figure}
+\begin{center}
+ \includegraphics[width=0.75\columnwidth]{ginf-T-decane-ethanol.eps}
+\end{center}
+\caption{\label{fig:ethanol2}%
+         (b) Linhas tracejadas: 
+             $\Delta a_{12}= 8773.6$~J/mol, $\Delta a_{21}=-26.6$~J/mol;
+             linha sólida: 
+         $q_{12}=0.7$, $\Delta a_{12}=6500.0$~J/mol, 
+         $\Delta a_{21}=-2353.7$~J/mol.}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Equilíbrio líquido-vapor}
+A lei de Raoult modificada é:	%
+\begin{equation}
+	\label{eq:mraoultlaw}
+	x_i \gamma_i(T,P,x) P_{i}^{vap}(T)  = y_iP\,,
+\end{equation}
+que sujeita ao vínculo de normalização da fração molar da fase gasosa $\sum_i^{c} y_i $, 
+permite o isolamento da pressão $P = \sum_i^{c} x_i \gamma_i(T,P,x) P_{i}^{vap}(T)$. 
+	\begin{block}{função objetivo}
+		$f_{obj} = \sum_k^{N_{p}}\sum_i ((\gamma_{ik} - \gamma_{ik}^{exp})/ \gamma_{ik}^{exp})^2$,
+	\end{block}
+\begin{figure}
+\includegraphics[width=0.4\columnwidth]{gamma_vs_x_acetone_methanol.eps}
+\includegraphics[width=0.4\columnwidth]{P_vs_x_acetone_methanol.eps}
+        \end{figure}
+\end{frame}
+
+\subsection{Modelo NRTL}
+\begin{frame}{NRTL}
+\begin{eqnarray}
+\label{eq:ge-nrtl} 
+ g^E &=& \sum_i^c x_i \sum_j^c x_{ji} \Delta a_{ji} \nonumber \\
+     &=& \sum_i^c x_i \frac{\sum_j^c x_j A_{q,ji} \Delta a_{ji}}
+                           {\sum_k^c x_k A_{q,ki}}.
+\end{eqnarray}
+%
+O modelo NRTL introduz um parâmetro de randomicidade 
+ $\alpha_{ij}=\alpha_{ji}$,
+apenas o parâmetro $A_{q,ij}$ é dado pela variação da Eq.~(\ref{eq:Aq}), 
+nomeadamente 
+$ A_{q,ij} = \exp_{q_{ij}}(-\alpha_{ij}\frac{\Delta a_{ij}}{RT})$.
+%
+A expressão para o coeficiente de atividade para o componente $i$ é 
+formalmente o mesmo que o original do modelo NRTL ($q_{ij}=1$), 
+apenas substituindo o parâmetro usual $A_{ij}$ por $A_{q,ij}$.
+Este procedimento não é válido para encontrar entropia molar de excesso e
+entalpia molar de excesso, devido a:  %Eq.~(\ref{eq:dAqdT}).
+%
+\begin{equation}
+\label{eq:dAqdT}
+ \frac{dA_{q,ij}}{dT}= A_{q,ij}^{q_{ij}} \frac{\Delta a_{ij}}{RT^2}.
+\end{equation}
+\end{frame}
+
+
+
+\section{Interações de Longo Alcance}
+
+\subsection{Equação de Poisson}
+
+\subsubsection{Soluções Analíticas}
+\begin{frame}{Poisson-Boltzmann}
+	Equação de Poisson:
+	\begin{equation}
+           \nabla^2 \psi \approx -\frac{\rho}{\epsilon \epsilon_0}
+        \end{equation}
+considerando a densidade de carga segundo a distribuição de Boltzmann;
+\begin{equation}
+	\nabla^2 \psi(r) = -\frac{1}{\epsilon_{r}\epsilon_{0}}{\sum_{i}^{n}z_i |e|N_{i}\exp\left(-\frac{z_i |e|\psi(r)}{{k_b}T}\right)}
+\end{equation}
+
+\begin{equation}
+	\nabla^2 \psi(r) = \frac{e^{2} \sum_{i}^{n} N_i z_{i}^{2}}{ \epsilon \epsilon_0 k_b T }{\psi(r)} 
+\end{equation}
+
+	\begin{equation}
+		\kappa^{2} =   \frac{e^{2} \sum_{i}^{n} N_i z_{i}^{2}}{ \epsilon \epsilon_0 k_b T }
+	\end{equation}
+
+
+	Parte da solução da equação diferencial linear  acima é dada por:
+
+	\begin{equation}
+\psi(r) = \frac{A}{r}\exp(-\kappa r)
+\end{equation}
+
+\end{frame}
+
+\subsection{Coeficiente de Atividade Iônico Médio}
+\begin{frame}{Coeficiente de Atividade Iônico Médio}
+Ao considerarmos apenas os primeiros termos da expansão em série da equação 
+\begin{equation}
+\psi(r) = \frac{A}{r}\exp(-\kappa r),
+\end{equation}
+	obtemos:
+	\begin{equation}
+            \psi(r) = \frac{A}{r} - {A\kappa}.
+	\end{equation}
+	Para o limite de $lim_{N_i\to 0} {\kappa} = 0 $, e o potencial na superficie para um único 
+	íon é	dado por $\psi_s(a) = \frac{z_{+}e }{4\pi\epsilon_r \epsilon_0 a} $, logo,
+	\begin{equation}
+		\label{pdhll}
+		\psi(r) =  \frac{z_{+}e }{4\pi\epsilon_r \epsilon_0 r} -   \frac{z_{+}e \kappa}{4\pi\epsilon_r \epsilon_0 } 
+	\end{equation}
+\end{frame}
+
+\begin{frame}{G\"{u}ntelberg-M\"{u}ller}
+	  A aplicação do processo de carga de G\"{u}ntelberg-M\"{u}ller à  equação~\ref{pdhll} a menos do íon central $j$
+	  nos fornece a energia extra e um íon devido à atmosfera de interação resultando em 
+	  \begin{equation}
+		  W_j = \int^{q}_{0} (\psi(a)- \psi_s(a))dq
+	  \end{equation}
+            sendo a energia de Helmholtz  $F^{el} = W_j$, logo: 
+	\begin{equation}
+		\log_{10} \gamma^{\pm} = -\log_{10}(\exp(1)) \frac{e^2 \kappa }{8 \pi k_b T}z_{+}z_{-}
+	\end{equation}
+%\begin{equation}
+%\nabla^2 \psi(r) = -\frac{4\pi}{\epsilon_{r}\epsilon_{0}}\rho(r)
+%\end{equation}
+
+%\begin{equation}
+%\nabla^2 \psi(r) = \kappa^2\psi(r)
+%\end{equation}
+%
+%\begin{equation}
+%\kappa^2 = \frac{\sum_{i}^{n}N_i{z_i}^2 {|e|}^2}{V\epsilon_{r}\epsilon_{0}{k_b}T}
+%\end{equation}
+\end{frame}
+
+\begin{frame}{Debye-Huckel}
+A indução elétrica da carga sobre o íon $\alpha$ na direção radial é dada por:
+	\begin{equation}
+		-\epsilon_r \epsilon_0 \frac{\partial \psi}{\partial r } =
+		 \frac{\epsilon_r \epsilon_0 A}{r^2} \exp(-\kappa r)(1+\kappa r ) \quad (r\geq a )    
+	\end{equation}
+
+	\begin{equation}
+		\frac{\epsilon_r \epsilon_0 A}{a^2} \exp(-\kappa a)(1+\kappa a )    =   \frac{z_{\alpha}|e|}{a^2}
+	\end{equation}
+	logo,
+	\begin{equation}
+		\psi(r) = \frac{z_{\alpha}|e|}{4\pi \epsilon_r \epsilon_0 r }\frac{\exp(-\kappa (r-a))}{1+\kappa a } 
+        \end{equation}
+
+	\begin{equation}
+		\psi_s(a) = \frac{z_{\alpha}|e|}{4\pi \epsilon_r \epsilon_0}\frac{1}{1+\kappa a } 
+        \end{equation}
+
+        \begin{equation}
+		\psi_{\alpha}(a) = -\frac{z_{\alpha}|e|}{4\pi \epsilon_r \epsilon_0}\frac{\kappa}{1+\kappa a } 
+        \end{equation}
+\end{frame}
+
+\begin{frame}{G\"{u}ntelberg-M\"{u}ller}
+	\begin{eqnarray}
+		F^{el} = \int_{0}^{1} \sum_{\alpha}\psi_{\alpha}(\lambda)z_{\alpha}d\lambda = 
+		\int_{0}^{1} \sum_{i} N_i\psi_{i}(\lambda)z_{i}|e|d\lambda \\\nonumber
+		= -\sum_{i} \frac{N_{i}z_{i}^{2}|e|^2\kappa}{4\pi \epsilon_r \epsilon_0 }\tau(\kappa a) 
+	\end{eqnarray}
+	onde, $\tau(\kappa a) = \int_{0}^{1}\frac{\lambda^2}{1+\lambda \kappa a} d \lambda $.
+Pela definição de energia parcial molar: 
+	\begin{equation}
+		\mu^{el}_{i} = \frac{\partial G }{\partial N_i} =
+		-\frac{z_i^2 |e|^2 }{2 4\pi \epsilon_r \epsilon_0 }\frac{\kappa }{1+\kappa a},
+	\end{equation}
+ainda é possível considerar a parcela correspondente da interação iônica com solvente:
+	\begin{equation}
+		\mu^{el}_{i} = \frac{\partial G }{\partial N_i} =
+		-\frac{z_i^2 |e|^2 }{8\pi \epsilon_r \epsilon_0 }\frac{\kappa }{1+\kappa a}
+		+\frac{\kappa^3V_i}{24 \pi N_A }\sigma(\kappa a) .
+	\end{equation}
+\end{frame}
+
+
+\begin{frame}{$q$-Debye-Huckel}
+	A generalização da solução de Debye-H\"{u}ckel:
+\begin{equation}
+	\label{eq:sph}
+	\psi(r) = \frac{A}{r}\exp_q(-\kappa r), 
+\end{equation}
+	\begin{equation}
+		\psi_q(r) = \frac{z_{\alpha}|e|}{4\pi \epsilon_r \epsilon_0 (1+\kappa a( \exp_q(-\kappa a))^{q-1})r}\frac{\exp_q(-\kappa r)}{\exp_q(-\kappa a)} 
+        \end{equation}
+	\begin{figure}
+         \includegraphics[width=6cm]{_q_exp_all_cases_v01.eps}
+	\end{figure}
+
+\end{frame}
+
+\begin{frame}{Exemplos da solução de $q$-Debye-H\"{u}ckel}
+\begin{figure}
+\centering
+  \includegraphics[width=7.5cm]{esferico_q}
+	\caption{Influência do parâmetro $q$ na Equação $q$-Debye-H\"{u}ckel em escala {\it linear}.}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Exemplos da solução de $q$-Debye-H\"{u}ckel}
+\begin{figure}
+\centering
+  \includegraphics[width=7.5cm]{esferico_q_log_linear}
+	\caption{Influência do parâmetro $q$ na Equação $q$-Debye-H\"{u}ckel em escala {\it log-linear}.}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Exemplos da solução de $q$-Debye-H\"{u}ckel}
+\begin{figure}
+\centering
+  \includegraphics[width=7.5cm]{esferico_q_log_log}
+	\caption{Influência do parâmetro $q$ na Equação $q$-Debye-H\"{u}ckel em escala {\it log-log}.}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Coeficiente de atividade -  $q$-Debye-H\"{u}ckel}
+	A generalização da solução de Debye-H\"{u}ckel:
+	\begin{equation}
+		\psi_q(r) = \frac{z_{\alpha}|e|}{4\pi \epsilon_r \epsilon_0 (1+\kappa a( \exp_q(-\kappa a))^{q-1})r}\frac{\exp_q(-\kappa r)}{\exp_q(-\kappa a)} 
+        \end{equation}
+	Definindo $\psi_{q,\alpha}$
+	\begin{equation}
+		\psi_{q,\alpha} = \frac{z_{\alpha}|e|}{4\pi \epsilon_r \epsilon_0 (1+\kappa a( \exp_q(-\kappa a))^{q-1})a} 
+		- \frac{z_{\alpha}|e|}{ 4\pi \epsilon_r \epsilon_0 a}.  
+	\end{equation}
+	A energia livre é obtida pelo processo de carga de G\"{u}ntelberg.
+	\begin{eqnarray}
+		F^{el} = \int_{0}^{1} \sum_{\alpha}\psi_{q,\alpha}(\lambda)z_{\alpha}d\lambda 
+	\end{eqnarray}
+	A integração da equação acima foi realizada numericamente bem como o procedimento para calcular o potencial 
+	$\mu^{el} = \frac{\partial G }{\partial N_i}$.  
+\end{frame}
+
+\begin{frame}
+\begin{figure}
+\centering
+  \includegraphics[width=7.5cm]{KCl_activity}
+	\caption{Influência do parâmetro $q$ na Equação $q$-Debye-H\"{u}ckel em escala {\it log-log}.}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}
+\begin{figure}
+\centering
+  \includegraphics[width=7.5cm]{KCl_hamer_activity_v00.eps}
+	\caption{Influência do parâmetro $q$ na Equação $q$-Debye-H\"{u}ckel em escala {\it log-log}.}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\begin{figure}
+\centering
+  \includegraphics[width=10.0cm]{activity_coef_all.eps}
+	\caption{Influência do parâmetro $q$ na Equação $q$-Debye-H\"{u}ckel em escala {\it log-linear}.}
+\end{figure}
+\end{frame}
+
+
+
+
+
+
+
+
+\subsection{Tensão Superficial}
+
+\begin{frame}
+	\begin{figure}
+ \centering
+  \includegraphics[width=10.0cm]{abstract_Onsager.jpg}
+		\caption{Resumo do artigo do Onsager e Samaras (1934).}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\begin{columns}
+		\begin{column}{3.5cm}
+	\begin{block}{Onsager Samaras}
+	$	u^{im} = \frac{e^2}{16\pi \epsilon z } exp(-2z/L_D )$
+	\end{block}
+			\begin{block}{Tensão superficial - OS}
+			       $\Delta \sigma = \alpha \times c \ln(\frac{\beta}{c})$ 
+			\end{block}
+		\end{column}
+		\begin{column}{6.0cm}
+	\begin{figure}
+ \centering
+  \includegraphics[width=5.0cm]{diagram_esq_onsager}
+		\caption{Diagrama esquemático Onsager e Samaras (1934) .}
+	\end{figure}
+
+		\end{column}
+	\end{columns}
+%        \begin{block}{Proposta} 
+%	\begin{equation}
+%		u^{im}_q(r) = \frac{(z_{\alpha}|e|)^2}{4\pi \epsilon_r \epsilon_0 (1+\kappa a( \exp_q(-2\kappa a))^{q-1})4r}\frac{\exp_q(-2\kappa r)}{\exp_q(-2\kappa a)} 
+%        \end{equation}
+%	\end{block}
+\end{frame}
+
+\begin{frame}{}
+%	\begin{block}{Onsager Samaras}
+%	\begin{equation}
+%		u_{im} = \frac{e^2}{16\pi \epsilon z } exp(-2z/L_D )
+%	\end{equation}
+%	\end{block}
+         \begin{block}{Schmutzer's function}
+	\begin{eqnarray}
+		\Gamma_i^{z=0} = c\int_{R_i}^{\infty} (exp(-u^{im}/{k_B T})-1)dz - cR_i \\\equiv  \frac{L_B^{-1/2} c^{1/2}}{2\sqrt{2}}f_s(a_Dc^{1/2},R_i/L_D)
+	\end{eqnarray}
+	 \end{block}
+	 \begin{equation}
+               f_s = \int_{2R_i/L_D}^{\infty} (\exp(-a_D c^{1/2}\exp(-Z)/Z) -1)dZ - \frac{2R_i}{L_D}
+	 \end{equation}
+\end{frame}
+
+	\begin{frame}{Slavchov 2012}
+		\begin{columns}
+			\begin{column}{5cm}
+	\begin{figure}
+         \centering
+          \includegraphics[width=5cm]{slavchov_model.jpg}
+	\caption{Camada da interface composta pela espessura de uma molécula de água.}
+	\end{figure}
+			\end{column}
+			\begin{column}{5cm}
+	\begin{eqnarray}
+		\Delta \sigma = -2\int_{0}^{C_m} \Gamma_i d\mu_{el} \nonumber \\
+		 = -\frac{T}{\sqrt(2)} \int_{0}^{C_m}\frac{f_s(a_Dc^{1/2},R_i/L_D)}{1-v_{el}c} \nonumber \\
+		 \times \frac{L_B^{-1/2c^{1/2} }}{C_m}\left( 1+c_m \frac{d\ln\gamma_{\pm}}{dc_m}\right)dc_m \nonumber
+	\end{eqnarray}
+		\begin{equation}
+                 \log_{10}\gamma_{\pm} = -\frac{A_D \sqrt{c_m}}{1+B\sqrt{c_m}} +\sum\beta_jc_m^j \nonumber
+		\end{equation}
+			\end{column}
+		\end{columns}
+\end{frame}
+
+
+\begin{frame}
+	\begin{columns}
+		\begin{column}{3.5cm}
+	\begin{block}{Onsager Samaras}
+	$	u^{im} = \frac{e^2}{16\pi \epsilon z } exp(-2z/L_D )$
+	\end{block}
+		\end{column}
+		\begin{column}{6.0cm}
+	\begin{figure}
+ \centering
+  \includegraphics[width=5.0cm]{diagram_esq_onsager}
+		\caption{Diagrama esquemático Onsager e Samaras (1934) .}
+	\end{figure}
+
+		\end{column}
+	\end{columns}
+        \begin{block}{Proposta} 
+	\begin{equation}
+		u^{im}_q(r) = \frac{(z_{\alpha}|e|)^2}{4\pi \epsilon_r \epsilon_0 (1+\kappa a( \exp_q(-2\kappa a))^{q-1})4r}\frac{\exp_q(-2\kappa r)}{\exp_q(-2\kappa a)} 
+        \end{equation}
+	\end{block}
+
+\end{frame}
+
+
+%\begin{frame}
+%\begin{columns}
+%\begin{column}{4cm}
+%	\begin{block}{NaCl}
+%    \begin{figure}
+%     \includegraphics[scale=0.15]{sem_epsl_conc_cmodel_NaCl_Slavchov_2012.eps}
+%     \end{figure}
+%	\end{block}
+%	\begin{block}{NaCl}
+%    \begin{figure}
+%     \includegraphics[scale=0.5]{apendice_NaCl}
+%     \end{figure}
+%	\end{block}
+%\end{column}
+%\begin{column}{4cm}
+%	\begin{block}{NaBr}
+%    \begin{figure}
+%     \includegraphics[scale=0.15]{sem_epsl_conc_cmodel_NaBr_Slavchov_2012.eps}
+%     \end{figure}
+%	\end{block}
+%	\begin{block}{NaBr}
+%    \begin{figure}
+%     \includegraphics[scale=0.5]{apendice_NaBr}
+%     \end{figure}
+%	\end{block}
+%\end{column}
+%\begin{column}{4cm}
+%	\begin{block}{NaI}
+%    \begin{figure}
+%	    \includegraphics[scale=0.15]{sem_epsl_conc_cmodel_NaI_Slavchov_2012.eps}
+%     \end{figure}
+%	\end{block}
+%	\begin{block}{NaI}
+%    \begin{figure}
+%     \includegraphics[scale=0.5]{apendice_NaI}
+%     \end{figure}
+%	\end{block}
+%\end{column}
+%\end{columns}
+%\end{frame}
+%
+%
+%\begin{frame}
+%\begin{columns}
+%\begin{column}{4cm}
+%	\begin{block}{KCl}
+%    \begin{figure}
+%     \includegraphics[scale=0.15]{sem_epsl_conc_cmodel_KCl_Slavchov_2012.eps}
+%     \end{figure}
+%	\end{block}
+%	\begin{block}{KCl}
+%    \begin{figure}
+%     \includegraphics[scale=0.5]{apendice_KCl}
+%     \end{figure}
+%	\end{block}
+%\end{column}
+%\begin{column}{4cm}
+%	\begin{block}{KBr}
+%    \begin{figure}
+%     \includegraphics[scale=0.15]{sem_epsl_conc_cmodel_KBr_Slavchov_2012.eps}
+%     \end{figure}
+%	\end{block}
+%	\begin{block}{KBr}
+%    \begin{figure}
+%     \includegraphics[scale=0.5]{apendice_KBr}
+%     \end{figure}
+%	\end{block}
+%\end{column}
+%\begin{column}{4cm}
+%	\begin{block}{KI}
+%    \begin{figure}
+%	    \includegraphics[scale=0.15]{sem_epsl_conc_cmodel_KI_Slavchov_2012.eps}
+%     \end{figure}
+%	\end{block}
+%	\begin{block}{KI}
+%    \begin{figure}
+%     \includegraphics[scale=0.5]{apendice_KI}
+%     \end{figure}
+%	\end{block}
+%\end{column}
+%\end{columns}
+%\end{frame}
+
+
+
+\begin{frame}
+\begin{columns}
+\begin{column}{4cm}
+	\begin{block}{NaCl}
+    \begin{figure}
+     \includegraphics[scale=0.175]{comparar_NaCl.eps}
+     \end{figure}
+	\end{block}
+	\begin{block}{KCl}
+    \begin{figure}
+     \includegraphics[scale=0.175]{comparar_KCl.eps}
+     \end{figure}
+	\end{block}
+\end{column}
+\begin{column}{4cm}
+	\begin{block}{NaBr}
+    \begin{figure}
+     \includegraphics[scale=0.175]{comparar_NaBr.eps}
+     \end{figure}
+	\end{block}
+	\begin{block}{KBr}
+    \begin{figure}
+     \includegraphics[scale=0.175]{comparar_KBr.eps}
+     \end{figure}
+	\end{block}
+\end{column}
+\begin{column}{4cm}
+	\begin{block}{NaI}
+    \begin{figure}
+	    \includegraphics[scale=0.175]{comparar_NaI.eps}
+     \end{figure}
+	\end{block}
+	\begin{block}{KI}
+    \begin{figure}
+     \includegraphics[scale=0.175]{comparar_KI.eps}
+     \end{figure}
+	\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+
+
+\begin{frame}{Valores ótimos de q}
+	Resultados do ajuste do parâmetro $q$ da tensão superficial da proposta de generalização ($u^{im}_q$)
+	da equação de Onsager-Samaras (1934).
+	\begin{table}
+		\caption{Parâmetro $q$ ajustado para dados experimentais de tensão superficial de soluções aquosas
+		de eletrólitos concentrados}
+		\begin{tabular}{l|lll}
+		&            q   &       $r_{+}$ &    $r_{-}$  \\\hline
+{NaCl}    	&         2.15    &     1.02       &    1.81    \\
+{NaBr}    	&         2.65    &     1.02       &    1.96    \\
+{NaI }    	&          1.15   &      1.02      &     2.20   \\ 
+{KCl }    	&          2.15   &      1.38      &    1.81    \\
+{KBr }    	&          2.00   &      1.38      &    1.96    \\
+{KI  }    	&           1.15  &       1.38     &     2.20   
+		\end{tabular}
+	\end{table}
+
+\end{frame}
+
+\begin{frame}{Teoria de Condensação de Contraíons - Manning-1969}
+
+%A formulação da teoria de condensação de contraíons desenvolvida
+%por Manning (1969)~\cite{Manning1969} para a solução de 
+%eletrólitos permanece relevante na explicação do 
+%comportamento de suas propriedades coligativas. Manning 
+%tratou este problema com as seguintes hipóteses:
+
+\begin{enumerate}
+	\item A cadeia polimérica é substituída por uma 
+		linha infinita uniformemente carregada;
+	\item A interação entre dois ou mais poli-íons 
+		são negligenciadas; 
+	\item O solvente é considerado como meio contínuo
+		e a constante dielétria é considerada 
+		como a mesma do solvente puro para a 
+		mesma temperatura; 
+	\item Numa solução diluída um número suficiente de 
+		contraíons condensará sobre o poli-íon 
+		para reduzir a densidade de carga do polieletrólito 
+		que o mantém acima do valor do parâmetro de 
+		estabilidade $\xi$;
+	\item Íons não condensados são tratados pela aproximação de 
+		Debye-H{\"u}ckel.
+	\end{enumerate}
+\end{frame}
+\begin{frame}{Polieletrólitos}
+	\begin{figure}
+		\includegraphics[width=6cm]{manning-diagrama.eps}
+	\end{figure}
+
+\begin{equation}
+ \psi(u) = 2\frac{\beta}{\epsilon}\int^{+\infty}_{1} \frac{\exp(-\kappa u t)}{\sqrt{t^2-1}}dt\,,
+\end{equation}
+	\begin{block}{Representação por função de Bessel modificada de segunda espécie e ordem zero.}
+	\begin{equation}
+ \psi(u) = 2\frac{\beta}{\epsilon}  K_0(u).
+	\label{eq:manning_sol}
+\end{equation}
+	\end{block}
+\end{frame}
+\begin{frame}{Proposta}
+        %
+\begin{equation}
+ K_{0,q}(u) =  \int_{1}^{\infty}\frac{\exp_q(-u t)}{\sqrt{t^2-1}}dt.
+\end{equation}
+
+\begin{equation}
+ \label{eq:cylq}
+ \psi_q(u) =  2\frac{\beta}{\epsilon}  K_{0,q}(\kappa u).
+\end{equation}
+\begin{figure}
+\centering
+	{\includegraphics[width=4.5cm]{cylindrical}}
+	\qquad
+	{\includegraphics[width=4.5cm]{cylindrical_log_linear}}
+%\caption{
+%	Potencial adimensionalizado como função da distância para a 
+%	geometria cilíndrica.
+%	Linha sólida vermelha: caso ordinário ($q=1$);
+%	linha pontilhada preta: $q<1$; linha tracejada preta: $q>1$.
+% (a) Escala linear-linear (b) Escala log-linear.
+%}
+ \label{fig:cylindrical_q}
+\end{figure}
+
+
+
+\end{frame}
+
+%\section{Interfacial Tension in electrolyte solutions}
+\section{Conclusão}
+
+\begin{frame}
+
+	\begin{itemize}
+\item LR - Integração numérica de equação diferencial de Poisson-Boltzmann implementado em R. 
+      Demonstrando a limitação da solução pelos métodos convencionais sistemas 
+      com alta concentração. Embora não tenha sido implementado, a integração 
+      da equação diferencial por abordagens de métodos de Monte-Carlo ou correlatos 
+      pode ser um caminho para esta dificuldade Holst 1995; 
+\item LR - Embora tenha sido explorado de maneira eficaz as propriedades de tensão superficial 
+      e coeficiente de atividade iônico médio para soluções de eletrólitos fortes existe 
+      uma lacuna dos efeitos combinados das energias de solvatação e o quanto apenas o termo de Born 
+      seria suficiente para representar o restante da escala de molalidade; 
+\item LR - A elaborada conjectura apresentada entre os comportamentos monotônicos para 
+      concentrações moderadas de eletrólitos univalentes  e a condição de depleção de
+      íons é importante que seja mais aprofundada com outras medições da camada 
+      de interface; 
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\begin{itemize}
+\item LR - O comportamento da força da imagem do íon oscilatória ao longo de R 
+      com decaimento da cauda seguindo aparentemente lei de potência sugere a 
+      necessidade de proprosição de modelos que estão dentro escopo da Mecânica 
+      estatistica não extensiva, como explicado no capítulo de aspectos matemático 
+      deste documento de qualificação; 
+\item LR - O texto da qualificação deixa uma lacuna de desenvolvimento ao propor 
+      as relações generalizado para a camada dupla em geometria plana e o problema 
+      de condensação de contraíons sem demonstrar as aplicações. Umas das principais
+      vantagens das funções desenvolvidas está na não limitação do potencial da 
+      superfície de contorno, que para a condição de solução da equação de Poisson
+      Boltzmann é necessária. 
+\item Para a conclusão da tese o doutorando finalizará a descrição de sistemas simples 
+      que auxiliem no bom entendimento da tese. 
+\item No documento final serão incluídos os algorítimos implementado nos softwares R, Fortran
+      e interfaces construídas em Shiny. 
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+	\begin{itemize}
+\item LR - O texto da qualificação deixa uma lacuna de desenvolvimento ao propor 
+      as relações generalizado para a camada dupla em geometria plana e o problema 
+      de condensação de contraíons sem demonstrar as aplicações. Umas das principais
+      vantagens das funções desenvolvidas está na não limitação do potencial da 
+      superfície de contorno, que para a condição de solução da equação de Poisson
+      Boltzmann é necessária. 
+\item Para a conclusão da tese o doutorando finalizará a descrição de sistemas simples 
+      que auxiliem no bom entendimento da tese. 
+\item No documento final serão incluídos os algorítimos implementado nos softwares R, Fortran
+      e interfaces construídas em Shiny. 
+	\end{itemize}
+\end{frame}
+
+
+\end{document}
